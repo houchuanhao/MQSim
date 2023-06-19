@@ -2,7 +2,7 @@ import os
 
 from script.tools import *
 #treeOri,rootOri
-treeOri,rootOri = getTree("../../" + xml_ssdcfg)
+treeOri,rootOri = getTree("../" + xml_ssdcfg)
 
 dicOri = root2dic(rootOri)
 os.system("rm -rf workspace")

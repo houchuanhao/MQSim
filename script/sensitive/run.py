@@ -1,5 +1,5 @@
 from script.tools import *
-treeOri,rootOri = getTree("../../"+xml_ssdcfg) # mqsim下的配置文件
+treeOri,rootOri = getTree("../"+xml_ssdcfg) # script下的配置文件
 
 
 dicOri = root2dic(rootOri)
