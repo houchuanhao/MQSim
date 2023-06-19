@@ -1,0 +1,1 @@
+../../../../MQSim -i ssdconfig.xml -w workload.xml

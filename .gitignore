@@ -1,3 +1,10 @@
 MQSim
 build/
-
+.DS_Store
+.idea/
+script/.DS_Store
+script/*.xlsx
+script/*.xml
+script/sensitive/*.xlsx
+script/sensitive/workspace/
+workload_scenario_1.xml
