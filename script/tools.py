@@ -5,7 +5,6 @@ import re
 xml_ssdcfg='ssdconfig.xml'
 xml_workload='workload.xml'
 xml_out='workload_scenario_1.xml'
-path_ssdcfg= '../ssdconfig.xml'
 path_sensitive= 'sensitive.xlsx'
 path_readme = '../README.md'
 precision = ['Overprovisioning_Ratio','GC_Exect_Threshold','GC_Hard_Threshold','PCIe_Lane_Bandwidth']
@@ -54,7 +53,10 @@ def setext(root,key,value):
     return None
 
 #travel(root)
-def root2dic(root, dic={}):
+def root2dic(root, dic=None):
+    if dic==None:
+        dic = {}
+    #print(dic)
     for child in root:
         if child.tag in dic:
             print("error")
@@ -87,7 +89,7 @@ def dic2xlsx(dic,path=path_sensitive):
 
 def saveTree(tree,path):
     tree.write(path)
-def getTree(path=path_ssdcfg):
+def getTree(path):
     tree = ET.parse(path)
     root = tree.getroot()
     return tree,root
@@ -107,16 +109,3 @@ def str2num(s):
         return int(s)
     if is_numeric(s)==2:
         return float(s)
-def main():
-    tree = ET.parse(path_ssdcfg)
-    root = tree.getroot()
-    dic = root2dic(root, {})
-    dic2xlsx(dic)
-    #os.system("cp ../ssdconfig.xml ./")
-    #os.system("cp ../workload.xml ./")
-    #print(getext(root,"Page_Metadat_Capacity"))
-    #setext(root,"Page_Metadat_Capacity","1234")
-    #print(getext(root,"Page_Metadat_Capacity"))
-        # 将修改后的内容写回到文件
-    #tree.write('example.xml')
-#main()

@@ -1,5 +1,5 @@
 from script.tools import *
-treeOri,rootOri = getTree("../../"+xml_ssdcfg) # mqsim下的配置文件
+treeOri,rootOri = getTree("./"+xml_ssdcfg) # sensitive下的配置文件
 dicOri = root2dic(rootOri)
 collection = "collection.xlsx"
 i=0
@@ -14,7 +14,7 @@ for key,value in dicOri.items():
     p_out = "workspace/" + key + "/" + xml_out
 
     if value != None and is_numeric(value) > 0:
-        o_tree,o_root = getTree(p_out)
+        print("pout",p_out)
         tree,root = getTree(p_ssd)
         dic = root2dic(root,{})
         lst = []
@@ -22,7 +22,12 @@ for key,value in dicOri.items():
         lst.append(value)
         lst.append(getext(root,key))
         lst.append('37293')
-        iops = getext(o_root, 'IOPS')
+        iops = 0
+        try:
+            o_tree,o_root = getTree(p_out)
+            iops = getext(o_root, 'IOPS')
+        except Exception as e:
+            print("nowork ",p_out)
         lst.append(iops)
         elst.append(lst)
 
