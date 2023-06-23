@@ -21,10 +21,12 @@ for key,value in dicOri.items():
         os.system("cp  ../link/run.py workspace/" + key + "/run.py")
         v = 0
         if is_numeric(value) == 1:
-            v = int(value) * 10
+            v = int(value)
+            v = int(v/10)
             v = str(v)
         else:
-            v = float(value) * 10
+            v = float(value)
+            v= v /10
             v = str(v)
         tree,root = getTree(p_ssd)
         setext(root,key,v)

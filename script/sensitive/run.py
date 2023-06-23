@@ -8,4 +8,7 @@ for key,value in dicOri.items():
     p_ssd = "workspace/" + key + "/" + xml_ssdcfg
     p_workload = "workspace/" + key + "/" + xml_workload
     if value != None and is_numeric(value)>0:
-        os.system("../../MQSim -i "+p_ssd + " -w "+ p_workload)
+        try :
+            os.system("../../MQSim -i "+p_ssd + " -w "+ p_workload)
+        except Exception as e:
+            print(key," ",value)

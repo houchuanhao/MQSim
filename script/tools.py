@@ -8,6 +8,15 @@ xml_out='workload_scenario_1.xml'
 path_sensitive= 'sensitive.xlsx'
 path_readme = '../README.md'
 precision = ['Overprovisioning_Ratio','GC_Exect_Threshold','GC_Hard_Threshold','PCIe_Lane_Bandwidth']
+xlsx_config = "config.xlsx"
+
+def xlsx2lst(path,clom=6):
+    lst =[]
+    workbook = openpyxl.load_workbook(xlsx_config)
+    sheet = workbook.active
+    for row in sheet.iter_rows(values_only=True):
+        lst.append(list(row))
+    return lst
 def is_numeric(string):
     int_pattern = r'^[-+]?\d+$'  # 整数模式 返回1
     float_pattern = r'^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$'  # 浮点数模式 返回2
@@ -71,7 +80,7 @@ def dic2root(dic,root):
         setext(root,key,value)
 def dic2xlsx(dic,path=path_sensitive):
     workbook = openpyxl.load_workbook(path)
-    worksheet = workbook['Sheet1']
+    worksheet = workbook.active
     i = 1
     for key,value in dic.items():
         v = value
@@ -109,3 +118,9 @@ def str2num(s):
         return int(s)
     if is_numeric(s)==2:
         return float(s)
+
+def lst2dic(lst, p=6):
+    dic = {}
+    for data in lst:
+        dic[data[0]] = data[p]
+    return dic
