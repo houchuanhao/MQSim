@@ -15,7 +15,11 @@ def xlsx2lst(path,clom=6):
     workbook = openpyxl.load_workbook(xlsx_config)
     sheet = workbook.active
     for row in sheet.iter_rows(values_only=True):
-        lst.append(list(row))
+        lst_row = list(row)
+        for i in range(len(lst_row),6+1):
+            lst_row.append(None)
+        lst.append(lst_row)
+    #print(lst)
     return lst
 def is_numeric(string):
     int_pattern = r'^[-+]?\d+$'  # 整数模式 返回1
@@ -103,13 +107,33 @@ def getTree(path):
     root = tree.getroot()
     return tree,root
 def lst2excel(Lst,path):
+    print("lst2excel "+path)
     workbook = openpyxl.Workbook()
     worksheet = workbook.active
+    for row in worksheet.iter_rows():
+        for cell in row:
+            cell.value = None
+    for i, lst in enumerate(Lst, start=1):
+        for j,value in enumerate(lst,start=1):
+            #print("i="+str(i)," j="+str(j),"value= ",value)
+            worksheet.cell(row=i, column=j).value = str(value)
+    #print(path)
+    workbook.save(path)
+def lst2sheet(path,sheet_name,Lst):
+    workbook = openpyxl.Workbook()
+    sheet_names = workbook.sheetnames # 先删除
+    if sheet_name in sheet_names:
+        workbook.remove(workbook[sheet_name])
+        print("remove "+sheet_name)
+    worksheet = workbook.create_sheet(title=sheet_name+"zzz")  # 新建sheet
+    worksheet = workbook.create_sheet(title=sheet_name) # 新建sheet
     for i, lst in enumerate(Lst, start=1):
         for j,value in enumerate(lst,start=1):
             worksheet.cell(row=i, column=j).value = value
-    print(path)
+    print(workbook.sheetnames)
     workbook.save(path)
+    workbook.close()
+
 
 def str2num(s):
     if is_numeric(s)==0:
