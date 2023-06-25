@@ -10,3 +10,5 @@ script/sensitive/workspace/
 workload_scenario_1.xml
 script/collection/ssdRange.xlsx
 script/collection/workloadRange.xlsx
+script/.ipynb_checkpoints/
+script/collection/workspace*

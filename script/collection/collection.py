@@ -33,3 +33,23 @@ dic.update(dic_worload)
 
 dic2xlsx(dic, "config.xlsx")
 
+def collection(folder_path="workspace1",lst = None):
+    rLst = []
+    if lst != None:
+        rLst = lst
+    for f in os.scandir(folder_path):
+        if f.is_dir():
+            xmlpath= f.path+"/workload_scenario_1.xml"
+            if not os.path.exists(xmlpath):
+                continue
+            ssd = f.path + "/" + xml_ssdcfg
+            workload = f.path + "/" + xml_workload
+            dic_ssd,dic_worload = xml2dic(ssd,workload)
+            tree,root = getTree(xmlpath)
+            iops = getext(root,"IOPS")
+            rLst.append([iops,dic_ssd,dic_worload,f.path])
+            print(iops)
+    print(len(rLst))
+    return (rLst)
+collection()
+
