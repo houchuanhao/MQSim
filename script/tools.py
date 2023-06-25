@@ -10,10 +10,14 @@ path_readme = '../README.md'
 precision = ['Overprovisioning_Ratio','GC_Exect_Threshold','GC_Hard_Threshold','PCIe_Lane_Bandwidth']
 xlsx_config = "config.xlsx"
 
-def xlsx2lst(path,clom=6):
+def xlsx2lst(path,sheetname=None):
     lst =[]
-    workbook = openpyxl.load_workbook(xlsx_config)
-    sheet = workbook.active
+    workbook = openpyxl.load_workbook(path)
+    sheet = None
+    if sheetname==None:
+        sheet = workbook.active
+    else:
+        sheet = workbook[sheetname]
     for row in sheet.iter_rows(values_only=True):
         lst_row = list(row)
         for i in range(len(lst_row),6+1):
@@ -81,7 +85,7 @@ def root2dic(root, dic=None):
     return dic
 def dic2root(dic,root):
     for key,value in dic.items():
-        setext(root,key,value)
+        setext(root,key,str(value))
 def dic2xlsx(dic,path=path_sensitive):
     workbook = openpyxl.load_workbook(path)
     worksheet = workbook.active

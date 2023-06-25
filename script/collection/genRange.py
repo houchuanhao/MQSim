@@ -71,7 +71,8 @@ class Parameter:
     def lst2parameter(lst):
         p = Parameter(lst)
         return p
-    def getRandValue(self,structMax = 32):
+    def getRandValue(self,structMax=None):
+
         if self.type == Type.t_ignore:
             self.value = self.default
             return
@@ -80,7 +81,7 @@ class Parameter:
             return
         if self.type == Type.t_float:
             self.value = random.uniform(self.min,self.max)
-            #print(self.key, " ", type(self.min), self.min, self.max)
+            #print("test float: ",self.key, " ",self.value, self.min, self.max)
             return
         if self.type == Type.t_int or self.type == Type.t_percentage or self.type ==Type.t_reserved:
 
@@ -109,37 +110,91 @@ def getrow(lst,key):
     return None
 
 
+path_ssd = xml_ssdcfg
+path_workload = xml_workload
+
+
+def gen_run():
+    maxC = 999999999999999999999999  # 大于这个就不能运行 不能运行的下界
+    minC = 0  # 小于这个一定能运行 能运行的上界
+    i = 0
+    try:
+        os.system("rm -rf workspace/")
+    except:
+        print("rm -rf workspace 失败")
+    os.system("mkdir workspace")
+    while(1):
+        tree_ssd, root_ssd = getTree(path_ssd)
+        tree_workload, root_workload = getTree(path_workload)
+        dic_ssd = root2dic(root_ssd, {})
+        dic_workload = root2dic(root_workload, {})
+        lst_ssd = xlsx2lst(xlsx_config, "ssd")
+        lst_workload = xlsx2lst(xlsx_config, "workload")
+        # dic_ssd_ref 和dic_workload_ref 是参考模板
+        # lst_ssd 和lst_workload 记录参数的类型、默认值等
+        # parameters_ssd parameters_workload 中存放range了
+        parameters_ssd = []
+        parameters_workload = []
+
+        for key, value in dic_ssd.items():
+            row = getrow(lst_ssd,key)
+            p = Parameter(row)
+            p.getRange()
+            p.getRandValue()
+            dic_ssd[key] = p.value
+            parameters_ssd.append(p.r2lst())
+        for key, value in dic_workload.items():
+            row = getrow(lst_workload,key)
+            p = Parameter(row)  # key default type min max
+            p.getRange()
+            if key in Parameter.struct.keys():
+                p.getRandValue(dic_ssd[Parameter.struct[key]])
+            else:
+                p.getRandValue()
+            dic_workload[key] = p.value
+            parameters_workload.append(p.r2lst())
+
+        c = 1
+        clst = ['Flash_Channel_Count','Chip_No_Per_Channel','Die_No_Per_Chip',
+                'Plane_No_Per_Die','Block_No_Per_Plane','Page_No_Per_Block','Page_Capacity']
+        for key in clst:
+            c = c * int(dic_ssd[key])
+            print(key," :",dic_ssd[key])
+        if c > maxC:
+            continue
+        os.system("mkdir workspace/" + str(i))
+
+        dic2root(dic_ssd,root_ssd)
+        path = "workspace/"+str(i)+"/"+xml_ssdcfg
+        print("path= ------",path)
+        tree_ssd.write(path)
+
+        dic2root(dic_workload,root_workload)
+        path = "workspace/"+str(i)+"/"+xml_workload
+        tree_workload.write(path)
+
+        lst2excel(parameters_ssd, "workspace/"+str(i)+"/ssdRange.xlsx")
+        lst2excel(parameters_workload, "workspace/"+str(i)+"/workloadRange.xlsx")
+
+        os.system("cp  ../link/run workspace/" + str(i) + "/run")
+        os.system("cp  ../link/run.py workspace/" + str(i) + "/run.py")
+        try:
+            os.system("../../MQSim -i workspace/"+str(i) + "/"+xml_ssdcfg + " -w workspace/"+str(i)+"/"+xml_workload)
+        except:
+            print(i,"error")
+        if(os.path.exists("workspace/"+str(i)+"/workload_scenario_1.xml")): # 能运行
+            if minC < c:
+                minC = c
+                print("minC ",minC)
+        else: # 不能运行
+            #os.system("rm -rf workspace/"+str(i))
+            if maxC > c:
+                maxC = c
+                print("maxC: ",maxC)
+        i = i + 1
 
 
 def main():
-    path_ssd = xml_ssdcfg
-    path_workload = xml_workload
-    tree_ssd , root_ssd = getTree(path_ssd)
-    tree_workload , root_workload = getTree(path_workload)
-    dic_ssd = root2dic(root_ssd,{})
-    dic_workload = root2dic(root_workload,{})
-    lst = xlsx2lst(xlsx_config)
-    parameters_ssd = []
-    parameters_workload = []
-    for key, value in dic_ssd.items():
-        #print(key)
-        row = getrow(lst,key)
-        #p = Parameter(key,value,row[2])
-        p = Parameter(row)
-        p.getRange()
-        p.getRandValue()
-        parameters_ssd.append(p.r2lst())
-
-    print("--------")
-    for key, value in dic_workload.items():
-        #print(key)
-        row = getrow(lst,key)
-        p = Parameter(row)  # key default type min max
-        p.getRange()
-        p.getRandValue()
-        #print(p.r2lst())
-        parameters_workload.append(p.r2lst())
-    lst2excel(parameters_ssd, "ssdRange.xlsx")
-    lst2excel(parameters_workload, "workloadRange.xlsx")
-    # parameters_ssd parameters_workload 中存放range了
+    gen_run()
 main()
+
