@@ -1,15 +1,14 @@
 from enum import Enum
 import random
-
-from script.tools import *
-
+import os
+from script.tools import tools
 class Type:
     t_float = "float"
     t_int = "int"
     t_ignore = "ignore"
     t_percentage = "percentage"
     t_reserved = "reserved"  # 保留 min_max
-    t_struce = "struce"
+    t_struct = "struct"
     t_modifed = "modifed" # 保留value
 
 class Parameter:
@@ -18,7 +17,7 @@ class Parameter:
               "Chip_IDs":"Chip_No_Per_Channel",
               "Die_IDs":"Die_No_Per_Chip",
               "Plane_IDs":"Plane_No_Per_Die"}
-    def __init__(self,key=None,default=None,type=None,min=None,max=None,m=None,value = None):
+    def __init__(self,key=None,default=None,type=None,min=None,max=None,value = None,m=None):
         self.key = key
         self.default = default
         self.type = type
@@ -38,12 +37,13 @@ class Parameter:
             self.m = lst[5]
 
     def getRange(self):
-        if self.type == Type.t_reserved or self.type == Type.t_modifed:
+        if self.type == Type.t_reserved or self.type == Type.t_modifed or Type.t_reserved in str(self.type):
             return
         if self.type == Type.t_percentage:
             self.max = 100
             self.min = 0
         if self.type == Type.t_int:
+            #print(self.type)
             self.default = int(self.default)
             if self.default % 256 == 0:
                 self.min = int(self.default / 256 / 16)
@@ -83,19 +83,24 @@ class Parameter:
             self.value = random.uniform(self.min,self.max)
             #print("test float: ",self.key, " ",self.value, self.min, self.max)
             return
-        if self.type == Type.t_int or self.type == Type.t_percentage or self.type ==Type.t_reserved:
+        if self.type == Type.t_int or self.type == Type.t_percentage or   Type.t_reserved in self.type:
 
             try:
-                self.value = int(random.randint(self.min,self.max))
+                if Type.t_float in self.type:
+                    self.value = float(random.uniform(self.min, self.max))
+                else:
+                    self.value = int(random.randint(self.min,self.max))
             except Exception as e:
-                print(self.key," ",type(self.min),self.min, self.max)
+                print("exception: ",self.key," ",self.type," ",self.min," ", self.max)
+                print(e)
             return
-        if self.type == Type.t_struce:
+        if self.type == Type.t_struct:
             k = int(random.randint(1,structMax))
             #print(self.key," ",k)
             numbers = random.sample(range(structMax), k)
             numbers = sorted(numbers)
             s = str(numbers[0])
+            s.replace(" ","")
             self.value = str(numbers).replace('[','').replace(']','')
             return
         if self.type == None:
@@ -110,8 +115,8 @@ def getrow(lst,key):
     return None
 
 
-path_ssd = xml_ssdcfg
-path_workload = xml_workload
+path_ssd = tools.xml_ssdcfg
+path_workload = tools.xml_workload
 
 
 def gen_run():
@@ -124,12 +129,12 @@ def gen_run():
         print("rm -rf workspace 失败")
     os.system("mkdir workspace")
     while(1):
-        tree_ssd, root_ssd = getTree(path_ssd)
-        tree_workload, root_workload = getTree(path_workload)
-        dic_ssd = root2dic(root_ssd, {})
-        dic_workload = root2dic(root_workload, {})
-        lst_ssd = xlsx2lst(xlsx_config, "ssd")
-        lst_workload = xlsx2lst(xlsx_config, "workload")
+        tree_ssd, root_ssd = tools.getTree(path_ssd)
+        tree_workload, root_workload = tools.getTree(path_workload)
+        dic_ssd = tools.root2dic(root_ssd, {})
+        dic_workload = tools.root2dic(root_workload, {})
+        lst_ssd = tools.xlsx2lst(tools.xlsx_config, "ssd")
+        lst_workload = tools.xlsx2lst(tools.xlsx_config, "workload")
         # dic_ssd_ref 和dic_workload_ref 是参考模板
         # lst_ssd 和lst_workload 记录参数的类型、默认值等
         # parameters_ssd parameters_workload 中存放range了
@@ -164,22 +169,22 @@ def gen_run():
             continue
         os.system("mkdir workspace/" + str(i))
 
-        dic2root(dic_ssd,root_ssd)
-        path = "workspace/"+str(i)+"/"+xml_ssdcfg
+        tools.dic2root(dic_ssd,root_ssd)
+        path = "workspace/"+str(i)+"/"+tools.xml_ssdcfg
         print("path= ------",path)
         tree_ssd.write(path)
 
-        dic2root(dic_workload,root_workload)
-        path = "workspace/"+str(i)+"/"+xml_workload
+        tools.dic2root(dic_workload,root_workload)
+        path = "workspace/"+str(i)+"/"+tools.xml_workload
         tree_workload.write(path)
 
-        lst2excel(parameters_ssd, "workspace/"+str(i)+"/ssdRange.xlsx")
-        lst2excel(parameters_workload, "workspace/"+str(i)+"/workloadRange.xlsx")
+        tools.lst2excel(parameters_ssd, "workspace/"+str(i)+"/ssdRange.xlsx")
+        tools.lst2excel(parameters_workload, "workspace/"+str(i)+"/workloadRange.xlsx")
 
         os.system("cp  ../link/run workspace/" + str(i) + "/run")
         os.system("cp  ../link/run.py workspace/" + str(i) + "/run.py")
         try:
-            os.system("../../MQSim -i workspace/"+str(i) + "/"+xml_ssdcfg + " -w workspace/"+str(i)+"/"+xml_workload)
+            os.system("../../MQSim -i workspace/"+str(i) + "/"+tools.xml_ssdcfg + " -w workspace/"+str(i)+"/"+tools.xml_workload)
         except:
             print(i,"error")
         if(os.path.exists("workspace/"+str(i)+"/workload_scenario_1.xml")): # 能运行

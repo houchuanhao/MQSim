@@ -12,3 +12,6 @@ script/collection/ssdRange.xlsx
 script/collection/workloadRange.xlsx
 script/.ipynb_checkpoints/
 script/collection/workspace*
+graduation
+__pycache__/
+tools/__pycache__/

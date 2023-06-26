@@ -1,4 +1,3 @@
-import os
 import xml.etree.ElementTree as ET
 import openpyxl
 import re
@@ -6,7 +5,7 @@ xml_ssdcfg='ssdconfig.xml'
 xml_workload='workload.xml'
 xml_out='workload_scenario_1.xml'
 path_sensitive= 'sensitive.xlsx'
-path_readme = '../README.md'
+path_readme = '../../README.md'
 precision = ['Overprovisioning_Ratio','GC_Exect_Threshold','GC_Hard_Threshold','PCIe_Lane_Bandwidth']
 xlsx_config = "config.xlsx"
 
