@@ -138,9 +138,9 @@ def lst2sheet(path,sheet_name,Lst):
     workbook.close()
 def xml2dic(ssd,workload):
     #print(ssd," ",workload)
-    tree,root = getTree(ssd)
+    tree , root = getTree(ssd)
     dic_ssd = root2dic(root)
-    tree,root = getTree(workload)
+    tree , root = getTree(workload)
     dic_workload = root2dic(root)
 
     return dic_ssd,dic_workload

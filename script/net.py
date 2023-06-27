@@ -18,6 +18,18 @@ class net(nn.Module):
         self.hidden_layer2 = nn.Linear(self.width, self.width)
         self.output_layer = nn.Linear(self.width, self.output)
 
+
+        nn.init.xavier_uniform_(self.linear.weight)
+        nn.init.zeros_(self.linear.bias)
+
+        nn.init.xavier_uniform_(self.linear1.weight)
+        nn.init.zeros_(self.linear1.bias)
+
+        nn.init.xavier_uniform_(self.linear2.weight)
+        nn.init.zeros_(self.linear2.bias)
+
+        nn.init.xavier_uniform_(self.output_layer.weight)
+        nn.init.zeros_(self.output_layer.bias)
         # Define sigmoid activation and softma1x output
         self.act1 = nn.Sigmoid()
         self.act2 = nn.Sigmoid()

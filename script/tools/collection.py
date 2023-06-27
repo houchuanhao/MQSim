@@ -1,5 +1,6 @@
 from script.tools import tools
 import os
+
 def collection(folder_path="workspace1",lst = None):
     rLst = []
     if lst != None:

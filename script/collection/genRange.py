@@ -128,13 +128,13 @@ def gen_run():
     except:
         print("rm -rf workspace 失败")
     os.system("mkdir workspace")
+    tree_ssd, root_ssd = tools.getTree(path_ssd)
+    tree_workload, root_workload = tools.getTree(path_workload)
+    dic_ssd = tools.root2dic(root_ssd, {})
+    dic_workload = tools.root2dic(root_workload, {})
+    lst_ssd = tools.xlsx2lst(tools.xlsx_config, "ssd")
+    lst_workload = tools.xlsx2lst(tools.xlsx_config, "workload")
     while(1):
-        tree_ssd, root_ssd = tools.getTree(path_ssd)
-        tree_workload, root_workload = tools.getTree(path_workload)
-        dic_ssd = tools.root2dic(root_ssd, {})
-        dic_workload = tools.root2dic(root_workload, {})
-        lst_ssd = tools.xlsx2lst(tools.xlsx_config, "ssd")
-        lst_workload = tools.xlsx2lst(tools.xlsx_config, "workload")
         # dic_ssd_ref 和dic_workload_ref 是参考模板
         # lst_ssd 和lst_workload 记录参数的类型、默认值等
         # parameters_ssd parameters_workload 中存放range了
