@@ -201,5 +201,4 @@ def gen_run():
 
 def main():
     gen_run()
-main()
 
