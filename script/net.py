@@ -66,3 +66,5 @@ class DeepNet(nn.Module):
         for layer in self.net:
             x = layer(x)
         return x
+def test(x,y,model):
+    out = model(x)

@@ -62,7 +62,8 @@ def getUsefullKeys(dic :dict,plst, expect:list):
                     value = float(value)
                 else:
                     if p.type == Parameter.Type.t_int or p.type == Parameter.Type.t_reserved or p.type == Parameter.Type.t_percentage:
-                        value = int(value)
+                        #print("getusefull keys: ",p.key,value)
+                        value = int(float(value))
                     else:
                         continue
 
