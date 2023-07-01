@@ -157,4 +157,5 @@ def lst2dic(lst, p=6):
     dic = {}
     for data in lst:
         dic[data[0]] = data[p]
+
     return dic
