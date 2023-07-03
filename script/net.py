@@ -47,11 +47,11 @@ class DeepNet(nn.Module):
 
         layers = []
         layers.append(nn.Linear(input_size, hidden_size))  # 输入层
-        layers.append(nn.ReLU())  # 第一个激活函数
+        layers.append(nn.Sigmoid())  # 第一个激活函数
 
         for _ in range(num_layers - 2):  # 中间的隐藏层
             layers.append(nn.Linear(hidden_size, hidden_size))
-            layers.append(nn.ReLU())
+            layers.append(nn.Sigmoid())
 
         layers.append(nn.Linear(hidden_size, output_size))  # 输出层
 

@@ -21,9 +21,9 @@ def collection(folder_path="workspace1",lst = None):
     print("collection: ",len(rLst))
     return (rLst)
 
-def getParameters(path):
-    ssdlst = tools.xlsx2lst(path,"ssd")
-    workloadlst = tools.xlsx2lst(path,"workload")
+def getParameters(path,id):
+    ssdlst = tools.xlsx2lst(path,"ssd"+id)
+    workloadlst = tools.xlsx2lst(path,"workload"+id)
     lst = []
     for row in ssdlst:
         p = Parameter.Parameter(row)
@@ -36,10 +36,13 @@ def struce2int(value=""):
     num = 0
     value = value.replace(" ","")
     value = value.split(",")
+    '''
     for v in value:
         t = int(v)
         num = num | (1 << t)
     return num
+    '''
+    return len(value)
 def usefull( p : Parameter, expect):
     if p.type == Parameter.Type.t_ignore:
         return False

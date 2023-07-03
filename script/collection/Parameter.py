@@ -13,10 +13,10 @@ class Type:
 
 class Parameter:
 
-    struct = {"Channel_IDs":"Flash_Channel_Count",
-              "Chip_IDs":"Chip_No_Per_Channel",
-              "Die_IDs":"Die_No_Per_Chip",
-              "Plane_IDs":"Plane_No_Per_Die"}
+    struct = {"Channel_IDs" : "Flash_Channel_Count",
+              "Chip_IDs" : "Chip_No_Per_Channel",
+              "Die_IDs" : "Die_No_Per_Chip",
+              "Plane_IDs" : "Plane_No_Per_Die"}
     def __init__(self,key=None,default=None,type=None,min=None,max=None,value = None,m=None):
         self.key = key
         self.default = default
@@ -120,8 +120,7 @@ path_workload = tools.xml_workload
 
 
 def gen_run():
-    maxC = 999999999999999999999999  # 大于这个就不能运行 不能运行的下界
-    minC = 0  # 小于这个一定能运行 能运行的上界
+    mstruct = ['Flash_Channel_Count','Chip_No_Per_Channel','Die_No_Per_Chip','Plane_No_Per_Die','Block_No_Per_Plane','Page_No_Per_Block','Page_Capacity']
     i = 0
     try:
         os.system("rm -rf workspace/")
@@ -132,9 +131,10 @@ def gen_run():
     tree_workload, root_workload = tools.getTree(path_workload)
     dic_ssd = tools.root2dic(root_ssd, {})
     dic_workload = tools.root2dic(root_workload, {})
-    lst_ssd = tools.xlsx2lst(tools.xlsx_config, "ssd")
-    lst_workload = tools.xlsx2lst(tools.xlsx_config, "workload")
+    lst_ssd = tools.xlsx2lst(tools.xlsx_config, "ssd1")
+    lst_workload = tools.xlsx2lst(tools.xlsx_config, "workload1")
     while(1):
+        i = i + 1
         # dic_ssd_ref 和dic_workload_ref 是参考模板
         # lst_ssd 和lst_workload 记录参数的类型、默认值等
         # parameters_ssd parameters_workload 中存放range了
@@ -165,8 +165,6 @@ def gen_run():
         for key in clst:
             c = c * int(dic_ssd[key])
             print(key," :",dic_ssd[key])
-        if c > maxC:
-            continue
         os.system("mkdir workspace/" + str(i))
 
         tools.dic2root(dic_ssd,root_ssd)
@@ -187,16 +185,6 @@ def gen_run():
             os.system("../../MQSim -i workspace/"+str(i) + "/"+tools.xml_ssdcfg + " -w workspace/"+str(i)+"/"+tools.xml_workload)
         except:
             print(i,"error")
-        if(os.path.exists("workspace/"+str(i)+"/workload_scenario_1.xml")): # 能运行
-            if minC < c:
-                minC = c
-                print("minC ",minC)
-        else: # 不能运行
-            #os.system("rm -rf workspace/"+str(i))
-            if maxC > c:
-                maxC = c
-                print("maxC: ",maxC)
-        i = i + 1
 
 
 def main():
