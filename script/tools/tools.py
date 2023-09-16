@@ -1,6 +1,7 @@
 import xml.etree.ElementTree as ET
 import openpyxl
 import re
+import os
 xml_ssdcfg='ssdconfig.xml'
 xml_workload='workload.xml'
 xml_out='workload_scenario_1.xml'
@@ -159,3 +160,11 @@ def lst2dic(lst, p=6):
         dic[data[0]] = data[p]
 
     return dic
+
+def get_all_folders(path):
+    folders = []
+    for item in os.listdir(path):
+        item_path = os.path.join(path, item)
+        if os.path.isdir(item_path):
+            folders.append(item_path)
+    return folders

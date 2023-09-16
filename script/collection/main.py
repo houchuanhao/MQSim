@@ -1,2 +1,2 @@
 from script.collection import Parameter
-Parameter.main()
+Parameter.mai1522n()

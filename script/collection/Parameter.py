@@ -72,7 +72,12 @@ class Parameter:
         p = Parameter(lst)
         return p
     def getRandValue(self,structMax=None):
-
+        if self.key == "Block_No_Per_Plane": # default 2048  1024-1024*7
+            self.value = random.randint(1, 7)*1024
+            return
+        if self.key == "Page_No_Per_Block": # default 256 -1536
+            self.value = random.randint(1, 6) * 256
+            return
         if self.type == Type.t_ignore:
             self.value = self.default
             return
@@ -97,7 +102,8 @@ class Parameter:
         if self.type == Type.t_struct:
             k = int(random.randint(1,structMax))
             #print(self.key," ",k)
-            numbers = random.sample(range(structMax), k)
+            #numbers = random.sample(range(structMax), k)
+            numbers = range(0,k)
             numbers = sorted(numbers)
             s = str(numbers[0])
             s.replace(" ","")
@@ -120,19 +126,37 @@ path_workload = tools.xml_workload
 
 
 def gen_run():
-    mstruct = ['Flash_Channel_Count','Chip_No_Per_Channel','Die_No_Per_Chip','Plane_No_Per_Die','Block_No_Per_Plane','Page_No_Per_Block','Page_Capacity']
+    ssdsheet = "ssd0"
+    workloadsheet = "workload0"
+    workspace = "workspace_" + ssdsheet + "_"+workloadsheet
+    if os.path.exists(workspace):
+        print(workspace + " exists")
+        name = input("请输入你的名字: ")
     i = 0
+    '''
     try:
-        os.system("rm -rf workspace/")
+        os.system("rm -rf {}/".format(workspace))
+        print("OK: ","rm -rf {}/".format(workspace))
     except:
-        print("rm -rf workspace 失败")
-    os.system("mkdir workspace")
+        print("rm -rf {} failed".format(workspace))
+    '''
+    os.system("mkdir {}".format(workspace))
     tree_ssd, root_ssd = tools.getTree(path_ssd)
     tree_workload, root_workload = tools.getTree(path_workload)
     dic_ssd = tools.root2dic(root_ssd, {})
     dic_workload = tools.root2dic(root_workload, {})
-    lst_ssd = tools.xlsx2lst(tools.xlsx_config, "ssd1")
-    lst_workload = tools.xlsx2lst(tools.xlsx_config, "workload1")
+    lst_ssd = tools.xlsx2lst(tools.xlsx_config, ssdsheet)
+    lst_workload = tools.xlsx2lst(tools.xlsx_config, workloadsheet)
+    os.system("cp "+tools.xlsx_config + " "+workspace+"/configcp.xlsx")
+
+    all_folders = tools.get_all_folders(workspace)
+    max = 0
+    for folder in all_folders:
+        id = int(folder.split('/')[1])
+        if id > max:
+            max = id
+    print(max)
+    i = max
     while(1):
         i = i + 1
         # dic_ssd_ref 和dic_workload_ref 是参考模板
@@ -161,28 +185,30 @@ def gen_run():
 
         c = 1
         clst = ['Flash_Channel_Count','Chip_No_Per_Channel','Die_No_Per_Chip',
-                'Plane_No_Per_Die','Block_No_Per_Plane','Page_No_Per_Block','Page_Capacity']
+                'Plane_No_Per_Die','Block_No_Per_Plane','Page_No_Per_Block']
         for key in clst:
             c = c * int(dic_ssd[key])
             print(key," :",dic_ssd[key])
-        os.system("mkdir workspace/" + str(i))
+        if c> 13 *5 * 1 * 11 * 7000 * 1500:
+            continue
+        os.system(("mkdir {}/" + str(i)).format(workspace))
 
         tools.dic2root(dic_ssd,root_ssd)
-        path = "workspace/"+str(i)+"/"+tools.xml_ssdcfg
+        path = "{}/".format(workspace)+str(i)+"/"+tools.xml_ssdcfg
         print("path= ------",path)
         tree_ssd.write(path)
 
         tools.dic2root(dic_workload,root_workload)
-        path = "workspace/"+str(i)+"/"+tools.xml_workload
+        path = "{}/".format(workspace)+str(i)+"/"+tools.xml_workload
         tree_workload.write(path)
 
-        tools.lst2excel(parameters_ssd, "workspace/"+str(i)+"/ssdRange.xlsx")
-        tools.lst2excel(parameters_workload, "workspace/"+str(i)+"/workloadRange.xlsx")
+        tools.lst2excel(parameters_ssd, "{}/".format(workspace)+str(i)+"/ssdRange.xlsx")
+        tools.lst2excel(parameters_workload, "{}/".format(workspace)+str(i)+"/workloadRange.xlsx")
 
-        os.system("cp  ../link/run workspace/" + str(i) + "/run")
-        os.system("cp  ../link/run.py workspace/" + str(i) + "/run.py")
+        os.system("cp  ../link/run {}/".format(workspace) + str(i) + "/run")
+        os.system("cp  ../link/run.py {}/".format(workspace) + str(i) + "/run.py")
         try:
-            os.system("../../MQSim -i workspace/"+str(i) + "/"+tools.xml_ssdcfg + " -w workspace/"+str(i)+"/"+tools.xml_workload)
+            os.system("../../MQSim -i {}/".format(workspace)+str(i) + "/"+tools.xml_ssdcfg + " -w {}/".format(workspace)+str(i)+"/"+tools.xml_workload)
         except:
             print(i,"error")
 
@@ -190,3 +216,4 @@ def gen_run():
 def main():
     gen_run()
 
+#main()
