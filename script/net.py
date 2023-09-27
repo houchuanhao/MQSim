@@ -1,8 +1,8 @@
 import torch.nn as nn
 #from collection.collection import *
 #import collection.collection
-from script.tools import collection
-
+#from script.tools import collection
+import collection
 class NeuralNetwork(nn.Module):
     def __init__(self, input, hidden, layer, output):
         super().__init__()
