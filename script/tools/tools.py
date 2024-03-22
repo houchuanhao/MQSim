@@ -168,3 +168,17 @@ def get_all_folders(path):
         if os.path.isdir(item_path):
             folders.append(item_path)
     return folders
+
+
+def main():
+    keys = []
+    range = []
+    ssdsheet = "ssd0"
+    workloadsheet = "workload0"
+    workspace = "workspace_" + ssdsheet + "_" + workloadsheet
+    # tree_ssd, root_ssd = tools.getTree(tools.path_ssd)
+    lst_ssd = xlsx2lst(xlsx_config, ssdsheet)
+    lst_workload = xlsx2lst(xlsx_config, workloadsheet)
+    print(lst_ssd,lst_workload)
+    print("???")
+main()

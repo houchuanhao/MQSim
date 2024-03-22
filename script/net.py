@@ -68,3 +68,32 @@ class DeepNet(nn.Module):
         return x
 def test(x,y,model):
     out = model(x)
+from torch import nn
+
+
+#自编码
+class Autoencoder(nn.Module):
+    def __init__(self):
+        super(Autoencoder, self).__init__()
+        # 编码器
+        self.encoder = nn.Sequential(
+            nn.Linear(19, 15),  # 输入层到隐藏层1
+            nn.ReLU(True),
+            nn.Linear(15, 12),   # 隐藏层1到隐藏层2
+            nn.ReLU(True),
+            nn.Linear(12, 8)     # 隐藏层2到编码层
+        )
+        # 解码器
+        self.decoder = nn.Sequential(
+            nn.Linear(8, 12),    # 编码层到隐藏层1
+            nn.ReLU(True),
+            nn.Linear(12, 15),   # 隐藏层1到隐藏层2
+            nn.ReLU(True),
+            nn.Linear(15, 19),  # 隐藏层2到输出层
+            nn.Sigmoid()        # 使用Sigmoid激活函数确保输出值在0到1之间
+        )
+
+    def forward(self, x):
+        x = self.encoder(x)
+        x = self.decoder(x)
+        return x
