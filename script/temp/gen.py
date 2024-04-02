@@ -46,7 +46,7 @@ def set_value_random_ssd(parameterCfg):
                     b = int(max(1,z/4))
                     #print(a,b)
                     #pdb.set_trace()
-                    random_value = random.randint(b, a)
+                    random_value = random.randint(b, a)*256
                 else:
                     random_value = random.randint(param_min, param_max)
             else:
@@ -168,14 +168,14 @@ def main():
 def checkPara(parameters_ssd,parameters_workload):
     rebuild = False
     if parameters_ssd['Caching_Mechanism'] == 'SIMPLE' :
-        parameters_ssd['EQUAL_PARTITIONING']='EQUAL_PARTITIONING'
+        parameters_ssd['Data_Cache_Sharing_Mode']='EQUAL_PARTITIONING'
     c = 1
     clst = ['Flash_Channel_Count','Chip_No_Per_Channel','Die_No_Per_Chip',
             'Plane_No_Per_Die','Block_No_Per_Plane','Page_No_Per_Block']
     for key in clst:
         c = c * int(parameters_ssd[key])
         #print(key," :",parameters_ssd[key])
-    if c> 13 *5 * 1 * 11 * 7000 * 150:
+    if c> 8 *4 * 2 * 2 * 2048 * 256*4:
         rebuild = True
     return parameters_ssd,parameters_workload,rebuild
 def genworkspace(begin=0):
@@ -196,11 +196,7 @@ def genworkspace(begin=0):
         gen_workloadcfg(parameters_workload,"workspace/"+str(i)+"/workload.xml")
         save_dict_to_excel(parameters_ssd,"workspace/"+str(i)+"/ssdconfig.xlsx")
         save_dict_to_excel(parameters_workload, "workspace/" + str(i) + "/workload.xlsx")
-        os.system("pwd")
-        os.system("cd workspace/"+str(i)+"/")
-        os.system("pwd")
         os.system("../../../../MQSim -i ssdconfig.xml -w workload.xml")
-        os.system("cd ../..")
         i = i +1
         if i>3:
             break
