@@ -50,7 +50,7 @@ def set_value_random_ssd(parameterCfg):
                 else:
                     random_value = random.randint(param_min, param_max)
             else:
-                print(f"Unsupported parameter type for '{param_key}'. Skipping.")
+                #print(f"Unsupported parameter type for '{param_key}'. Skipping.")
                 continue
         parameters[param_key] = random_value
     return parameters
@@ -66,7 +66,7 @@ def xml2xlsx(xml,xlsx):
     # 3. 将字典保存到 Excel 文件中
     df = pd.DataFrame(list(parameters.items()), columns=['Parameter', 'Value'])
     df.to_excel(xlsx, index=False)
-    print("helo")
+    #print("helo")
 
 def gen_ssdcfg(tree,root,parameters,path):
     # 5. 根据字典为每个叶子节点重新赋值，修改后保存到 new.xml 中
@@ -96,7 +96,8 @@ def set_value_workload(parameterCfg, parasSsd):
             param_default = int(param_default)
             param_min = int(param_min)
             param_max = int(param_max)
-        if param_set != 'NaN':
+        if param_type=='enumeration' and param_set != 'NaN':
+            #print(param_set)
             param_set = param_set.replace(" ", "")
             param_set = param_set.replace("{", "")
             param_set = param_set.replace("}", "")
@@ -121,6 +122,7 @@ def set_value_workload(parameterCfg, parasSsd):
             else:
                 #print(f"Unsupported parameter type for '{param_key}'. Skipping.")
                 continue
+        parameters[param_key] = random_value
     #Flash_Channel_Count     Chip_No_Per_Channel     Die_No_Per_Chip     Plane_No_Per_Die
     #Channel_IDs    Chip_IDs    Die_IDs     Plane_IDs
     parameters['Channel_IDs'] = ','.join(map(str, range(int(parasSsd['Flash_Channel_Count']))))
@@ -175,7 +177,7 @@ def checkPara(parameters_ssd,parameters_workload):
     for key in clst:
         c = c * int(parameters_ssd[key])
         #print(key," :",parameters_ssd[key])
-    if c> 8 *4 * 2 * 2 * 2048 * 256*4:
+    if c> 32 *4 * 2 * 2 * 2048 * 256*4:
         rebuild = True
     return parameters_ssd,parameters_workload,rebuild
 def genworkspace(begin=0):
@@ -184,7 +186,7 @@ def genworkspace(begin=0):
     root = tree.getroot()
     parameterCfg_ssd = pd.read_excel("config.xlsx", sheet_name="ssd")
     parameterCfg_workload = pd.read_excel("config.xlsx", sheet_name="workload")
-    os.system("rm workspace/* -rf")
+    #os.system("rm -rf workspace/* ")
     while(1):
         parameters_ssd = set_value_random_ssd(parameterCfg_ssd)
         parameters_workload = set_value_workload(parameterCfg_workload,parameters_ssd)
@@ -196,10 +198,11 @@ def genworkspace(begin=0):
         gen_workloadcfg(parameters_workload,"workspace/"+str(i)+"/workload.xml")
         save_dict_to_excel(parameters_ssd,"workspace/"+str(i)+"/ssdconfig.xlsx")
         save_dict_to_excel(parameters_workload, "workspace/" + str(i) + "/workload.xlsx")
-        os.system("../../../../MQSim -i ssdconfig.xml -w workload.xml")
+        s = "../../MQSim -i workspace/"+str(i)+"/ssdconfig.xml -w workspace/"+str(i)+"/workload.xml"
+        #print(s)
+        os.system(s)
         i = i +1
-        if i>3:
-            break
+        #if i>3: break
 genworkspace(0)
 
     
