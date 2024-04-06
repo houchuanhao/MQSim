@@ -1,4 +1,6 @@
 import pandas as pd
+import torch
+from torch import nn
 
 
 class data_utils:
@@ -25,10 +27,6 @@ class data_utils:
         for index, row in df.iterrows():
             if row[key] == ori:
                 df.at[index, key] = target
-
-    def oneHot(self):
-        return
-
     def preprocess(self):
         self.rmLst = ["ssdSeed", "workloadSeed"]
         self.oneHotLst = []
@@ -38,13 +36,14 @@ class data_utils:
                 self.oneHotLst.append(row['Parameter'])
             if row['type']=='ignore':
                 self.rmLst.append(row['Parameter'])
-        print("one HotLst: \n", self.oneHotLst)
-        print("rmLst: \n",self.rmLst)
+        #print("one HotLst: \n", self.oneHotLst)
+        #print("rmLst: \n",self.rmLst)
     def dorp_and_encode(self):
-        df_result_droped = self.df_result.drop(columns=self.rmLst, errors='ignore')
-        self.df_result_encoded = pd.get_dummies(df_result_droped, columns=self.oneHotLst)
+        self.df_result_droped = self.df_result.drop(columns=self.rmLst, errors='ignore')
+        self.df_result_encoded = pd.get_dummies(self.df_result_droped, columns=self.oneHotLst)
         self.X = self.df_result_encoded.drop(columns=self.targetLst)
         self.Y = self.df_result_encoded[self.targetLst]
+        return self.X, self.Y
     def getParameterLst(self):
         col = self.df_config['Parameter']
         return col.to_list()
@@ -63,9 +62,13 @@ class data_utils:
         self.rmLst = []
         self.oneHotLst = []
         self.targetLst = []
-        self.preprocess()
-        self.dorp_and_encode()
-
+        #self.preprocess()
+        #self.dorp_and_encode()
+    def drop(self,columns_to_check,value,df =None):
+        if df is None:
+            df =self.df_result
+        df = df.drop(df[(df[columns_to_check] == value).any(axis=1)].index)
+        return df
     def get_statement(self, parameter):
         df_config_ssd = self.df_config_ssd
         df_config_workload = self.df_config_workload
@@ -76,3 +79,29 @@ class data_utils:
                 raise KeyError(parameter + "不存在")
         return row
         # raise KeyError(parameter + "不存在")
+
+
+# 自定义MPE损失函数
+class MPERegressionLoss(nn.Module):
+    def __init__(self):
+        super(MPERegressionLoss, self).__init__()
+
+    def forward(self, y_pred, y_true):
+        # 计算平均百分比误差
+        mpe = torch.mean(torch.abs((y_true - y_pred) / y_true))
+        return mpe
+# 定义模型
+# 定义模型
+class MLP(nn.Module):
+    def __init__(self, layer_sizes):
+        super(MLP, self).__init__()
+        self.layers = nn.ModuleList()
+        for i in range(len(layer_sizes) - 1):
+            self.layers.append(nn.Linear(layer_sizes[i], layer_sizes[i+1]))
+            if i < len(layer_sizes) - 2:
+                self.layers.append(nn.Sigmoid())
+
+    def forward(self, x):
+        for layer in self.layers:
+            x = layer(x)
+        return x
