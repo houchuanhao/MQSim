@@ -1,7 +1,9 @@
 import pandas as pd
 import torch
+from sklearn.tree import DecisionTreeRegressor
 from torch import nn
-
+from torch.utils.data import Dataset
+#import model
 
 class data_utils:
     def set_df_type(self, df):
@@ -95,13 +97,78 @@ class MPERegressionLoss(nn.Module):
 class MLP(nn.Module):
     def __init__(self, layer_sizes):
         super(MLP, self).__init__()
-        self.layers = nn.ModuleList()
-        for i in range(len(layer_sizes) - 1):
-            self.layers.append(nn.Linear(layer_sizes[i], layer_sizes[i+1]))
-            if i < len(layer_sizes) - 2:
-                self.layers.append(nn.Sigmoid())
+        self.hidden_layers = nn.ModuleList([
+            nn.Linear(layer_sizes[i], layer_sizes[i+1]) for i in range(len(layer_sizes)-1)
+        ])
+        self.batch_norms = nn.ModuleList([
+            nn.BatchNorm1d(layer_sizes[i+1]) for i in range(len(layer_sizes)-2)
+        ])
+        self.relu = nn.ReLU()  # 隐藏层的激活函数
+        self.Sigmoids = nn.ModuleList([
+            nn.Sigmoid() for i in range(len(layer_sizes) - 1)
+        ])
+        return
 
     def forward(self, x):
-        for layer in self.layers:
+        for i, layer in enumerate(self.hidden_layers):
             x = layer(x)
+            if i < len(self.hidden_layers) - 1:
+                x = self.batch_norms[i](x)  # 在隐藏层后应用BatchNormalization
+                x = self.Sigmoids[i](x)
         return x
+def r2_score(y_test, y_pred):
+        # 计算实际值的平均值
+    y_mean = torch.mean(y_test)
+
+        # 计算总平方和
+    ss_tot = torch.sum((y_test - y_mean) ** 2)
+
+        # 计算残差平方和
+    ss_res = torch.sum((y_test - y_pred) ** 2)
+
+        # 计算 R^2 分数
+    r2 = 1 - (ss_res / ss_tot)
+
+    return r2.item()  # 将 PyTorch 张量转换为标量值
+import numpy as np
+
+class ExtraRandomForest:
+    def __init__(self, n_estimators=100, max_depth=None, num_features = 0.9,min_samples_split=2):
+        self.n_estimators = n_estimators
+        self.max_depth = max_depth
+        self.min_samples_split = min_samples_split
+        self.trees = []
+
+    def fit(self, X, y):
+        for _ in range(self.n_estimators):
+            tree = self.build_tree(X, y)
+            self.trees.append(tree)
+
+    def build_tree(self, X, y):
+        num_features = X.shape[1]
+        feature_indices = np.random.choice(num_features, size=num_features, replace=True)
+
+        tree = DecisionTree(max_depth=self.max_depth, min_samples_split=self.min_samples_split)
+        tree.fit(X[:, feature_indices], y)
+        return tree
+
+    def predict(self, X):
+        predictions = np.zeros((X.shape[0], len(self.trees)))
+        for i, tree in enumerate(self.trees):
+            predictions[:, i] = tree.predict(X)
+        return np.mean(predictions, axis=1)
+
+class DecisionTree:
+    y_train = None
+    def __init__(self, **kwargs):
+        self.acc = None
+        super().__init__(**kwargs)
+
+    def predict(self, X):
+        y_pred = super().predict()
+        self.acc = self.percentage_error(DecisionTree.y_train,y_pred)
+        return y_pred
+
+    def percentage_error(self, y_true, y_pred):
+        return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
+

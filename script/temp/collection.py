@@ -47,7 +47,7 @@ for item in os.listdir(workspace_path):
         continue
     params =  xml2dict(path_ssdcfg, {},"ssdSeed")
     params = xml2dict(path_workload, params,"workloadSeed")
-    print(params)
+    #print(params)
     result = extract_values_from_xml(path_result)
     #print(result)
     params['id']=item
